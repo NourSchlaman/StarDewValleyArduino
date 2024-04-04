@@ -455,7 +455,7 @@ int counterAway = 0;
 
 int hunger = 100;
 int depression = 0;
-int jippie = 10;
+int jippie = 100;
 
 bool victory = false;
 bool isEating = false;
