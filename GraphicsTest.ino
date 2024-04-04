@@ -457,6 +457,16 @@ int hunger = 100;
 int depression = 0;
 int jippie = 100;
 
+int difficulty = 1;
+
+int hungerDifficultyAdd = 4;
+int hungerDifficultySubtract = 1;
+
+int depressionDifficultyAdd = 1;
+int depressionDifficultySubtract = 4;
+
+int jippieDifficulty = 1;
+
 bool victory = false;
 bool isEating = false;
 bool isNeutral = false;
@@ -563,8 +573,8 @@ void drawHungerBoxDecreasing(){
   u8g2.setDrawColor(1);
   u8g2.drawBox(balkX, balkY, hungerBalkLength, hungerBalkHeight);
   u8g2.sendBuffer();
-  hunger -= 2;
-  if (hunger <= 0) {
+  hunger -= hungerDifficultySubtract;
+  if (hunger < 0) {
       isDead = true;
       drawBeertje();
   }
@@ -577,8 +587,8 @@ void drawHungerBoxIncreasing(){
   u8g2.setDrawColor(1);
   u8g2.drawBox(balkX, balkY, hungerBalkLength, hungerBalkHeight);
   u8g2.sendBuffer();
-  hunger += 2;
-  if (hunger >= 100) {
+  hunger += hungerDifficultyAdd;
+  if (hunger > 100) {
         isEating = false;
   }
 }
@@ -590,7 +600,7 @@ void drawDepressionBoxDecreasing() {
   u8g2.setDrawColor(1); 
   u8g2.drawBox(balkX, balkY, depressionBalkWidth, depressionBalkLength); 
   u8g2.sendBuffer();
-  depression -= 2;
+  depression -= depressionDifficultySubtract;
   if (depression < 0) {
     depression = 0;
   }
@@ -603,8 +613,8 @@ void drawDepressionBoxIncreasing() {
   u8g2.setDrawColor(1); 
   u8g2.drawBox(balkX, balkY, depressionBalkWidth, depressionBalkLength); 
   u8g2.sendBuffer();
-  depression += 1;
-  if (depression >= 100) {
+  depression += depressionDifficultyAdd;
+  if (depression > 100) {
     isDead = true;
   }
 }
@@ -617,8 +627,8 @@ void drawJippieBoxIncreasing() {
   u8g2.setDrawColor(1); 
   u8g2.drawBox(balkX, balkY, jippieBalkWidth, jippieBalkLength); 
   u8g2.sendBuffer();
-  jippie -= 1;
-  if (jippie <= 0) {
+  jippie -= jippieDifficulty;
+  if (jippie < 0) {
         victory = true;
         isPlaying = false;
       }
@@ -648,12 +658,37 @@ void loop(void) {
     drawChickenNeutral();
   } else if (isPlaying) {
     drawChickenPlaying();
-  } else if (victory) {
+  } else if (victory && difficulty == 3) {
     while(1) {
     drawChickenSleep();
   
     }
   
+  } else if(victory && difficulty == 2) {
+    victory = false;
+    difficulty += 1;
+    hungerDifficultyAdd = 4;
+    hungerDifficultySubtract = 3;
+    depressionDifficultyAdd = 3;
+    depressionDifficultySubtract = 4;
+    jippieDifficulty = 2;
+    hunger = 100;
+    depression = 0;
+    jippie = 100;
+    drawChickenAway();
+
+  } else if (victory && difficulty == 1) {
+    victory = false;
+    difficulty += 1;
+    hungerDifficultyAdd = 5;
+    hungerDifficultySubtract = 2;
+    depressionDifficultyAdd = 2;
+    depressionDifficultySubtract = 3;
+    jippieDifficulty = 2;
+    hunger = 100;
+    depression = 0;
+    jippie = 100;
+    drawChickenAway();
   } else {
     drawChickenAway();
   }
