@@ -445,10 +445,20 @@ const unsigned char beertjom [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x0d, 0x00, 0x00
 };
 
+const unsigned char sterretje [] PROGMEM = {
+	0x80, 0x01, 0x80, 0x01, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0xe0, 0x07, 0xfe, 0x7f, 0xff, 0xff, 
+	0xfe, 0x7f, 0xfc, 0x1f, 0xe0, 0x07, 0xf0, 0x0f, 0xf8, 0x1f, 0xfc, 0x3f, 0x7e, 0x7e, 0x3e, 0x7c
+};
+
+const unsigned char slaapje [] PROGMEM = {
+	0x00, 0x00, 0xfc, 0x7f, 0x00, 0x60, 0x00, 0x30, 0x00, 0x18, 0x00, 0x0c, 0x00, 0x06, 0x00, 0x03, 
+	0x80, 0x01, 0xc0, 0x00, 0x60, 0x00, 0x30, 0x00, 0x18, 0x00, 0x0c, 0x00, 0xfc, 0x7f, 0x00, 0x00
+};
 
 
 int counterNeutral = 0;
 int counterDead = 0;
+int counterSleep = 0;
 int counterEating = 0;
 int counterPlaying = 0;
 int counterAway = 0;
@@ -459,13 +469,14 @@ int jippie = 100;
 
 int difficulty = 1;
 
-int hungerDifficultyAdd = 4;
-int hungerDifficultySubtract = 1;
+int hungerDifficultyAdd = 8;
+int hungerDifficultySubtract = 4;
 
-int depressionDifficultyAdd = 1;
-int depressionDifficultySubtract = 4;
+int depressionDifficultyAdd = 4;
+int depressionDifficultySubtract = 12;
 
-int jippieDifficulty = 1;
+int jippieDifficultySubtract = 4;
+int jippieDifficultyAdd = 0;
 
 bool victory = false;
 bool isEating = false;
@@ -517,20 +528,18 @@ void drawChickenAway() {
   counterAway = (counterAway + 1) % 4;
   drawHungerBoxDecreasing();
   drawDepressionBoxIncreasing();
-  drawJippieBox();
+  drawJippieBoxDecreasing();
 }
 
 void drawChickenNeutral() {
   delay(100);
   u8g2.clearBuffer();	
   u8g2.setDrawColor(1);
-  u8g2.drawXBMP(39, 3, 48, 48, chickenNeutralArray[counterNeutral]);
+  u8g2.drawXBMP(35, 3, 48, 48, chickenNeutralArray[counterNeutral]);
   counterNeutral = (counterNeutral + 1) % 4;
   drawHungerBoxDecreasing();
   drawDepressionBoxDecreasing();
-  drawJippieBox();
-
-
+  drawJippieBoxDecreasing();
 }
 
 void drawChickenPlaying() {
@@ -553,16 +562,36 @@ void drawChickenEating() {
   drawHungerBoxIncreasing();
   drawDepressionBoxIncreasing();
   drawJippieBox();
-
 }
 
 void drawChickenSleep() {
-  delay(1000);
+  delay(800);
   u8g2.clearBuffer();	
   u8g2.setDrawColor(1);
-  u8g2.drawXBMP(39, 3, 48, 48, chickenDeadArray[counterDead]);
+  u8g2.drawXBMP(45, 8, 48, 48, chickenDeadArray[counterDead]);
+  u8g2.drawXBMP(110, 6, 16, 16, sterretje);
+  u8g2.drawXBMP(110, 23, 16, 16, sterretje);
+  u8g2.drawXBMP(110, 40, 16, 16, sterretje);
+  if(counterSleep == 1) {
+    u8g2.drawXBMP(5, 6, 16, 16, slaapje);
+  } else if(counterSleep == 2) {
+    u8g2.drawXBMP(5, 6, 16, 16, slaapje);
+    u8g2.drawXBMP(22, 15, 16, 16, slaapje);
+  } else if(counterSleep == 3){
+    u8g2.drawXBMP(5, 6, 16, 16, slaapje);
+    u8g2.drawXBMP(22, 15, 16, 16, slaapje);
+    u8g2.drawXBMP(7, 25, 16, 16, slaapje);
+  } else if(counterSleep == 4){
+    u8g2.drawXBMP(22, 15, 16, 16, slaapje);
+    u8g2.drawXBMP(7, 25, 16, 16, slaapje);
+  } else if(counterSleep == 5){
+    u8g2.drawXBMP(7, 25, 16, 16, slaapje);
+  }
+
   u8g2.sendBuffer();
   counterDead = (counterDead + 1) % 2;
+  counterSleep = (counterSleep + 1) % 6;
+
 }
 
 void drawHungerBoxDecreasing(){
@@ -626,14 +655,28 @@ void drawJippieBoxIncreasing() {
   int jippieBalkLength = jippieBalkHeight;
   u8g2.setDrawColor(1); 
   u8g2.drawBox(balkX, balkY, jippieBalkWidth, jippieBalkLength); 
+  jippie -= jippieDifficultySubtract;
   u8g2.sendBuffer();
-  jippie -= jippieDifficulty;
+
   if (jippie < 0) {
-        victory = true;
-        isPlaying = false;
-      }
+    victory = true;
+    isPlaying = false;
+  }
 }
 
+void drawJippieBoxDecreasing() {
+  int balkX = 120;   
+  int balkY = map(jippie, 0, 100, 0, jippieBalkHeight); 
+  int jippieBalkLength = jippieBalkHeight;
+  u8g2.setDrawColor(1); 
+  u8g2.drawBox(balkX, balkY, jippieBalkWidth, jippieBalkLength); 
+  jippie += jippieDifficultyAdd;
+  u8g2.sendBuffer();
+
+  if (jippie >= 100) {
+    jippie = 100;
+  }
+}
 void drawJippieBox() {
   int balkX = 120;   
   int balkY = map(jippie, 0, 100, 0, jippieBalkHeight); 
@@ -648,6 +691,22 @@ void drawBeertje() {
   u8g2.drawXBMP(39, 3, 64, 64, beertjom);
   u8g2.sendBuffer();
 }
+
+void draw1star() {
+  u8g2.setDrawColor(1);
+  u8g2.drawXBMP(98, 3, 16, 16, sterretje);
+  u8g2.sendBuffer();
+
+}
+
+void draw2stars() {
+  u8g2.setDrawColor(1);
+  u8g2.drawXBMP(98, 3, 16, 16, sterretje);
+  u8g2.drawXBMP(98, 20, 16, 16, sterretje);
+  u8g2.sendBuffer();
+
+}
+
 
 void loop(void) {
   if (isDead) {
@@ -670,8 +729,9 @@ void loop(void) {
     hungerDifficultyAdd = 4;
     hungerDifficultySubtract = 3;
     depressionDifficultyAdd = 3;
-    depressionDifficultySubtract = 4;
-    jippieDifficulty = 2;
+    depressionDifficultySubtract = 7;
+    jippieDifficultySubtract = 3;
+    jippieDifficultyAdd = 2;
     hunger = 100;
     depression = 0;
     jippie = 100;
@@ -680,11 +740,11 @@ void loop(void) {
   } else if (victory && difficulty == 1) {
     victory = false;
     difficulty += 1;
-    hungerDifficultyAdd = 5;
-    hungerDifficultySubtract = 2;
-    depressionDifficultyAdd = 2;
-    depressionDifficultySubtract = 3;
-    jippieDifficulty = 2;
+    hungerDifficultyAdd = 7;
+    hungerDifficultySubtract = 4;
+    depressionDifficultyAdd = 5;
+    depressionDifficultySubtract = 6;
+    jippieDifficultySubtract = 4;
     hunger = 100;
     depression = 0;
     jippie = 100;
@@ -693,6 +753,11 @@ void loop(void) {
     drawChickenAway();
   }
   
+  if(difficulty == 2 && isDead == false) {
+    draw1star();
+  } else if(difficulty == 3 && isDead == false) {
+    draw2stars();
+  }
 
   button1State = digitalRead(button1Pin);
   button2State = digitalRead(button2Pin);
